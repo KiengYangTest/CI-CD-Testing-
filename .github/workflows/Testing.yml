@@ -1,0 +1,27 @@
+name: Deploy to production
+
+on:
+  push:
+    branches:
+      - KiengYangTest-patch-1
+
+  workflow_dispatch:
+
+env:
+  CONTAINER_NAME: vt-api-github
+  IMAGE: devpointer/vt-api-github-staging:$GITHUB_RUN_NUMBER
+
+jobs:
+  continuous-integration:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    
+    - name: Build Docker image
+      shell: bash
+      run: |
+        echo "${{ secrets.ENV_STAGING }}" >> .env
+

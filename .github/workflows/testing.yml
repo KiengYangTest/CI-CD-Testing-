@@ -1,0 +1,56 @@
+name: Deploy to Dev
+
+on:
+  push:
+    branches:
+      - testing
+      
+  workflow_dispatch:
+
+env:
+  CONTAINER_NAME: python-django-app-github
+  IMAGE: kiengyang/python-django-app:$GITHUB_RUN_NUMBER
+  
+jobs:
+  # continuous-integration:
+  #   runs-on: ubuntu-22.04
+  #   
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v4
+
+  #   - name: Alert to discord
+  #     run: |
+  #       bash -e .github/workflows/alert.sh $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID "${{ github.event.head_commit.message }}" $GITHUB_RUN_NUMBER "running" "$GITHUB_TRIGGERING_ACTOR" "Dev" "https://vt-b2b-client-9250.pointerasia.com" "Vt-b2b-clent start deploy Dev !"
+  #   
+  #   - name: Login to Docker registry
+  #     run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+  #   - name: Build Docker image
+  #     shell: bash
+  #     run: |
+  #       echo "${{ secrets.ENV_DEV }}" >> .env
+  #       docker build -t ${{env.IMAGE}} .
+
+  #   - name: Push Docker image
+  #     run: docker push ${{env.IMAGE}}
+  #     
+  continuous-deployment:
+    runs-on: Testing
+    # needs: continuous-integration
+    # 
+    steps:
+    - name: Login to Docker registry
+      run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+      
+    - name: pull docker image
+      run: docker pull ${{env.IMAGE}}
+
+    - name: deploy container 
+      run: |
+        docker stop ${{env.CONTAINER_NAME}} || true && docker rm ${{env.CONTAINER_NAME}} || true;
+        docker run -d --name ${{env.CONTAINER_NAME}} -p 8000:8000 ${{env.IMAGE}}
+
+    # - name: alert to discord
+    #   run: |
+    #     bash -e /srv/alert/alert-web.sh $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID "${{ github.event.head_commit.message }}" $GITHUB_RUN_NUMBER "${{ job.status }}" "$GITHUB_TRIGGERING_ACTOR" "Dev" "${{env.DOMAIN}}" "vt b2b client ${{ job.status }} deploy Dev !"

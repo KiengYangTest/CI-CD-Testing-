@@ -9,7 +9,7 @@ on:
 
 env:
   CONTAINER_NAME: python-django-app-github
-  IMAGE: kiengyang/python-django-app:v$GITHUB_RUN_NUMBER
+  IMAGE: kiengyang/python-django-app:v1
   
 jobs:
   # continuous-integration:
